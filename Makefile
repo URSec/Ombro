@@ -15,10 +15,16 @@ conf_sva :=	--prefix="$(builddist)"		\
 		--with-hacks-for='xen'		\
 		--enable-split-stack		\
 
+conf_xen :=	--prefix="$(dist)"		\
+		--disable-tools			\
+		--disable-docs			\
+		--disable-stubdom		\
+
 .PHONY: all
 all:
 	$(MK) -C "$(srctop)/llvm-project" _build_clang
 	$(MK) -C "$(srctop)/SVA" _build_sva
+	$(MK) -C "$(srctop)/Xen" _build_xen
 
 .PHONY: _build_clang
 _build_clang:
@@ -26,7 +32,7 @@ _build_clang:
 	cmake --build "./build" -j $$(nproc) --target install
 
 # Use our newly built compiler to build the following targets
-uses_sva_compiler := _build_sva
+uses_sva_compiler := _build_sva _build_xen
 $(uses_sva_compiler): export PATH:=$(builddist)/bin:$(PATH)
 $(uses_sva_compiler): export LD_LIBRARY_PATH:=$(builddist)/lib:$(LD_LIBRARY_PATH)
 $(uses_sva_compiler): export C_INCLUDE_PATH:=$(builddist)/include:$(C_INCLUDE_PATH)
@@ -37,3 +43,10 @@ _build_sva:
 	autoconf -o configure autoconf/configure.ac
 	./configure $(conf_sva)
 	$(MAKE) -j -C SVA install
+
+.PHONY: _build_xen
+_build_xen:
+	sed 's@$$builddist@$(builddist)@g' < "$(srctop)/xenbuild.config" > .config
+	./configure $(conf_xen)
+	cp -p "xen/sva.config" "xen/.config"
+	$(MAKE) -j DESTDIR="$(dist)" install

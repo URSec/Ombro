@@ -6,3 +6,7 @@
 	path = SVA
 	url = git@github.com:URSec/libSVA.git
 	branch = xen
+[submodule "Xen"]
+	path = Xen
+	url = git@github.com:URSec/Xen.git
+	branch = sva-port

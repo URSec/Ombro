@@ -1,0 +1,4 @@
+[submodule "llvm-project"]
+	path = llvm-project
+	url = git@github.com:URSec/SVA-Compiler.git
+	branch = sva-llvm10

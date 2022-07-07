@@ -1,3 +1,4 @@
+start_time := $(shell date +%s)
 srctop := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 builddist := $(srctop)/builddist
 dist := $(srctop)/dist
@@ -25,6 +26,7 @@ all:
 	$(MK) -C "$(srctop)/llvm-project" _build_clang
 	$(MK) -C "$(srctop)/SVA" _build_sva
 	$(MK) -C "$(srctop)/Xen" _build_xen
+	@printf "\n\e[32mBuild completed successfully in %ds\e[0m\n" "$$(($$(date +%s) - $(start_time)))"
 
 .PHONY: _build_clang
 _build_clang:

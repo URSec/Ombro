@@ -2,3 +2,7 @@
 	path = llvm-project
 	url = git@github.com:URSec/SVA-Compiler.git
 	branch = sva-llvm10
+[submodule "SVA"]
+	path = SVA
+	url = git@github.com:URSec/libSVA.git
+	branch = xen

@@ -11,11 +11,29 @@ conf_llvm :=	-DCMAKE_INSTALL_PREFIX="$(builddist)"	\
 		-DLLVM_ENABLE_BINDINGS='false'		\
 		-DLLVM_ENABLE_ASSERTIONS='true'		\
 
+conf_sva :=	--prefix="$(builddist)"		\
+		--with-hacks-for='xen'		\
+		--enable-split-stack		\
+
 .PHONY: all
 all:
 	$(MK) -C "$(srctop)/llvm-project" _build_clang
+	$(MK) -C "$(srctop)/SVA" _build_sva
 
 .PHONY: _build_clang
 _build_clang:
 	cmake -S "./llvm" -B "./build" $(conf_llvm)
 	cmake --build "./build" -j $$(nproc) --target install
+
+# Use our newly built compiler to build the following targets
+uses_sva_compiler := _build_sva
+$(uses_sva_compiler): export PATH:=$(builddist)/bin:$(PATH)
+$(uses_sva_compiler): export LD_LIBRARY_PATH:=$(builddist)/lib:$(LD_LIBRARY_PATH)
+$(uses_sva_compiler): export C_INCLUDE_PATH:=$(builddist)/include:$(C_INCLUDE_PATH)
+$(uses_sva_compiler): export CPLUS_INCLUDE_PATH:=$(builddist)/include:$(CPLUS_INCLUDE_PATH)
+
+.PHONY: _build_sva
+_build_sva:
+	autoconf -o configure autoconf/configure.ac
+	./configure $(conf_sva)
+	$(MAKE) -j -C SVA install
